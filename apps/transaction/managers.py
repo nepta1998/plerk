@@ -1,21 +1,55 @@
+from apps.company.models import Company
 from django.db import models
-from django.db.models import Q
+from django.db.models import Count, Q
+
+
 
 
 class TransactionManager(models.Manager):  # pylint: disable=too-few-public-methods
     """ Custom queries for transaction model"""
 
-    def data_table_filter(self, filter_data, order_by):
-        """ general filter from datatable"""
-        order = {'customer_name': 'customer__name', '-customer_name': '-customer__name',
-                 'user_name': 'user__first_name', '-user_name': '-user__first_name'}
-        if order_by in order:
-            order_by = order[order_by]
-        return self.get_queryset().filter(
-            Q(code__icontains=filter_data) |
-            Q(customer__name__icontains=filter_data) |
-            Q(user__first_name__icontains=filter_data) |
-            Q(user__last_name__icontains=filter_data) |
-            Q(label_quantity__icontains=filter_data) |
-            Q(date__icontains=filter_data)
-        ).values().order_by(order_by)
+    def company_most_sales(self):
+        companies = Company.objects.all()
+        total = []
+        for company in companies:
+            transaction = self.get_queryset().filter(status_approved=True, status_transaction = 'closed', company=company).aggregate(count=Count('company'))
+            transaction['name'] = company.name
+            total.append(transaction)
+        return total
+    
+    def company_most_sales2(self):
+        transactions = self.get_queryset().filter(status_approved=True)
+        dic = {}
+        for transaction in transactions:
+            key =  transaction.company.name
+            if key in dic:
+                dic[key] += 1
+            else:
+                dic[key] = 1
+        print(len(dic))
+        return dic
+    
+    def company_max_sales(self):
+        count=count=Count('company', filter=Q(status_approved=True, status_transaction = 'closed'))
+        max_sale = self.get_queryset().values('company__name').annotate(count = count).order_by('-count')[0]
+        return max_sale
+    
+    def company_min_sales(self):
+        count=count=Count('company', filter=Q(status_approved=True, status_transaction = 'closed'))
+        min_sale = self.get_queryset().values('company__name').annotate(count = count).order_by('count')[0]
+        return min_sale
+
+    def total_price_with_charge(self):
+        transactions = self.get_queryset().all()
+        price = sum([transaction.convert_cent_usd() for transaction in transactions if transaction.is_charged()])
+        return price
+    
+    def total_price_without_charge(self):
+        transactions = self.get_queryset().all()
+        price = sum([transaction.convert_cent_usd() for transaction in transactions if not transaction.is_charged()])
+        return price
+    
+    def company_max_reject(self):
+        count=Count('company', filter=Q(status_approved=False))
+        max_reject = self.get_queryset().values('company__name').annotate(count = count).order_by('-count')[0]
+        return max_reject
