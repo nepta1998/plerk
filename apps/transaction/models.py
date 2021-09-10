@@ -5,9 +5,6 @@ import uuid
 from apps.transaction.managers import TransactionManager
 
 class Transaction(models.Model):
-
-    
-
     """model Transaction """
     status = (("closed", "cerrado"), ("reserved", "resevado"), ("pending", "pendiente"))
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

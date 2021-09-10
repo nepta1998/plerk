@@ -1,6 +1,6 @@
-from apps.company.models import Company
 from django.db import models
-from django.db.models import Count, Q, Max
+from django.db.models import Count, Q
+from django.db.models.functions import TruncMonth, TruncDay
 
 
 
@@ -42,8 +42,8 @@ class TransactionManager(models.Manager):  # pylint: disable=too-few-public-meth
         return total
     
     def day_max_transactions_by_company(self, company):
-        count=Count('id', filter=Q(company=company))
-        records = self.get_queryset().extra(select={'day': 'date(date)'}).values('day').annotate(count=count).order_by('-count')
+        count=Count('day', filter=Q(company=company))
+        records = self.get_queryset().annotate(day=TruncDay('date')).values('day').annotate(count=count).order_by('-count')
         totales = [records[0]]
         for r in records[1:]:
             if r['count'] == totales[0]['count']:
@@ -51,3 +51,17 @@ class TransactionManager(models.Manager):  # pylint: disable=too-few-public-meth
                 continue
             break
         return totales
+
+    def count_transactions_by_company(self, company):
+        total = self.get_queryset().filter(company=company).count()
+        return total
+
+    def transactions_by_month_company(self, company):
+        count=Count('month', filter=Q(company=company))
+        months = self.get_queryset().annotate(month=TruncMonth('date')).values('month').annotate(count=count).order_by('month')
+        total = self.count_transactions_by_company(company)
+        for month in months:
+            month['month'] = month['month'].strftime("%B")
+            print(month["count"])
+            month['percent'] = round(month["count"] / total * 100, 2)
+        return months

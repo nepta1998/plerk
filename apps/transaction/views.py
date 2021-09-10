@@ -3,12 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from apps.transaction.models import Transaction
 
-class ReportTransaction(APIView):
+class SummaryService(APIView):
 
     def get(self, request, format=None):
-        """
-        Return 
-        """
         max_sale = Transaction.objects.company_max_sales()
         min_sales = Transaction.objects.company_min_sales()
         total_price_charged = Transaction.objects.total_price_with_charge()

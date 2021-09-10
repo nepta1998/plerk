@@ -1,6 +1,6 @@
 from django.urls import path
-from apps.transaction.views import ReportTransaction
+from apps.transaction.views import SummaryService
 
 urlpatterns = [
-    path('', ReportTransaction.as_view()),
+    path('', SummaryService.as_view()),
 ]
