@@ -10,7 +10,7 @@ class Transaction(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.ForeignKey(Company, on_delete = models.PROTECT)
     date = models.DateTimeField()
-    price = models.FloatField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     status_transaction = models.CharField(max_length = 8, choices = status)
     status_approved = models.BooleanField()
     objects = TransactionManager()
