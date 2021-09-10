@@ -9,6 +9,16 @@ class ReportCompany(APIView):
         """
         Return 
         """
-        print(kwargs['pk'])
+        company = Company.objects.get(pk=kwargs['pk'])
+        charged = Transaction.objects.total_transactions_charged_by_company(company)
+        no_charged = Transaction.objects.total_transactions_no_charged_by_company(company)
+        max_transactions=Transaction.objects.day_max_transactions_by_company(company)
+
+        dic = {
+            'name': company.name,
+            'charged': charged,
+            'no_charged': no_charged,
+            'max_transactions': max_transactions
+        }
         
-        return Response('hola mundo')
+        return Response(dic)

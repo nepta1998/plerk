@@ -13,5 +13,5 @@ class Command(BaseCommand):
         path = kwargs['path']
         with open(path, 'r') as f:
             reader = csv.DictReader(f)
-            company_names = { name['company'] for name  in reader if name['company'] }
+            company_names = { name['company'].capitalize() for name  in reader if name['company'] }
             Company.objects.bulk_create([ Company(name = name, status= 'active') for name in company_names])
