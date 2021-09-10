@@ -20,12 +20,12 @@ class TransactionManager(models.Manager):  # pylint: disable=too-few-public-meth
 
     def total_price_with_charge(self):
         transactions = self.get_queryset().all()
-        price = sum([transaction.convert_cent_usd() for transaction in transactions if transaction.status_approved])
+        price = sum([transaction.convert_cent_usd() for transaction in transactions if transaction.is_charged()])
         return price
     
     def total_price_without_charge(self):
         transactions = self.get_queryset().all()
-        price = sum([transaction.convert_cent_usd() for transaction in transactions if not transaction.status_approved])
+        price = sum([transaction.convert_cent_usd() for transaction in transactions if not transaction.is_charged()])
         return price
     
     def company_max_reject(self):
@@ -62,6 +62,5 @@ class TransactionManager(models.Manager):  # pylint: disable=too-few-public-meth
         total = self.count_transactions_by_company(company)
         for month in months:
             month['month'] = month['month'].strftime("%B")
-            print(month["count"])
             month['percent'] = round(month["count"] / total * 100, 2)
         return months
