@@ -23,7 +23,7 @@ class Command(BaseCommand):
             transactions = []
             for q in reader:
                 if q['company']:
-                    company= Company.objects.get(name=q['company'])
+                    company= Company.objects.get(name=q['company'].capitalize())
                     del q['company']
                     status_approved = validate[q['status_approved']]
                     del q['status_approved']
